@@ -11,17 +11,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import javax.swing.AbstractAction;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.Timer;
-
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class PriceTickerAPI {
@@ -45,6 +41,7 @@ public class PriceTickerAPI {
 		}
 		else {
 			System.out.println("Error");
+			System.exit(0);
 		}
 
 		String responseData = response.toString();
@@ -132,6 +129,14 @@ public class PriceTickerAPI {
 		dialog.setVisible(true);
 		 
 	}
+	
+	public static void UpdatePopup() {
+		
+		
+		
+	}
+	
+	
 	
 	public static void GettingDifference(Map<String, Float> initial) throws InterruptedException, IOException, ParseException {
 
