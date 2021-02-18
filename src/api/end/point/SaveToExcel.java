@@ -16,7 +16,7 @@ public class SaveToExcel {
 		
 		FileInputStream fis = new FileInputStream("C:\\Users\\sanka\\workspace\\ChangeRetrival\\data\\CryptoData.xlsx");
 		XSSFWorkbook workbook = new XSSFWorkbook(fis);
-		SimpleDateFormat format = new SimpleDateFormat("dd-mm-yy");
+		SimpleDateFormat format = new SimpleDateFormat("dd-mm-yy HH-mm");
 		XSSFSheet sheet = workbook.createSheet("Data"+ format.format(new Date()));
 		
 		XSSFRow row;

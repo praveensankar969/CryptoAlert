@@ -1,5 +1,8 @@
 package api.end.point;
 
+import java.awt.ComponentOrientation;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -10,8 +13,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import javax.swing.AbstractAction;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.Timer;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -70,8 +78,25 @@ public class GetApiData {
 
 	public static void Popup(float price1, float price2, String coin) {
 		
-		JFrame parent = new JFrame();
-		JOptionPane.showMessageDialog(parent, coin + " -Initial price: "+ price1 +" Current Price: "+ price2);
+		
+		final JOptionPane optionPane = new JOptionPane(coin + " -Initial price: "+ price1 +" Current Price: "+ price2, JOptionPane.INFORMATION_MESSAGE, JOptionPane.DEFAULT_OPTION, null, new Object[]{}, null);
+		final JDialog dialog = new JDialog();
+		dialog.setTitle("Alert");
+		dialog.setModal(true);
+		dialog.setContentPane(optionPane);
+		dialog.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
+		dialog.pack();
+		dialog.setBounds(300, 400, 600, 150);
+
+		Timer timer = new Timer(30000, new AbstractAction() {
+		    @Override
+		    public void actionPerformed(ActionEvent ae) {
+		        dialog.dispose();
+		    }
+		});
+		timer.setRepeats(false);
+		timer.start();
+		dialog.setVisible(true);
 		 
 	}
 	
@@ -85,7 +110,7 @@ public class GetApiData {
 			List<ApiTemplate> currentData = GetData();
 			Map<String, Float> currentDataMap = SaveInitialData(currentData);
 			currentPrice = new ArrayList<>(currentDataMap.values());
-			System.out.println("Check Point Timeout 1 minute at " + java.time.LocalTime.now());
+			System.out.println("Check Point Timeout 30 seconds at " + java.time.LocalTime.now());
 			String coin;
 			for(int i=0;i<currentPrice.size();i++) {
 				
@@ -162,7 +187,7 @@ public class GetApiData {
 				
 			}
 
-			Thread.sleep(60000);
+			Thread.sleep(30000);
 			System.out.println("---------------------------------------------------------------------------------------------------");
 		}
 
@@ -199,9 +224,7 @@ public class GetApiData {
 		List<ApiTemplate> initialPrice = GetData();
 		Map<String, Float> initialData = SaveInitialData(initialPrice);
 		SaveToExcel.SaveDataToExcel(initialPrice);
-		
 		GettingDifference(initialData);
-		
 	}
 
 }
