@@ -1,8 +1,6 @@
 package api.end.point;
 
-import java.awt.ComponentOrientation;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -16,23 +14,23 @@ import java.util.Map.Entry;
 
 import javax.swing.AbstractAction;
 import javax.swing.JDialog;
-import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.Timer;
+
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+public class PriceTickerAPI {
 
 
+	public static List<ApiTemplateTicker> GetData() throws IOException, ParseException {
 
-
-public class GetApiData {
-
-	public static List<ApiTemplate> GetData() throws IOException {
-
-		List<ApiTemplate> data = new ArrayList<ApiTemplate>();
-		URL url = new URL("https://api.wazirx.com/api/v2/market-status");
+		List<ApiTemplateTicker> data = new ArrayList<ApiTemplateTicker>();
+		URL url = new URL("https://api.wazirx.com/api/v2/tickers");
 		String readLine = null;
 		HttpURLConnection connection = (HttpURLConnection)url.openConnection();
 		connection.setRequestMethod("GET");
@@ -50,26 +48,61 @@ public class GetApiData {
 		}
 
 		String responseData = response.toString();
-		responseData = responseData.substring(responseData.indexOf("["), responseData.indexOf(",\"assets\":"));
-		System.out.println(responseData);
+		String[] arrayData = responseData.split("}");
 
-		try { data = new ObjectMapper().readValue(responseData, new TypeReference<List<ApiTemplate>>() {});
+		String tempText = arrayData[0].substring(1);
+		int index = tempText.indexOf("{");
+		int indexNext = tempText.indexOf("open")-2;
+		tempText= tempText.substring(index, indexNext)+"}";
+		JSONParser parser = new JSONParser();  
+		JSONObject json = (JSONObject) parser.parse(tempText); 
+		ObjectMapper objectMapper = new ObjectMapper(); 
+		ApiTemplateTicker obj = null;
+		
+		try { 
+			obj = objectMapper.readValue(json.toJSONString(),ApiTemplateTicker.class );
 
 		}catch(Exception e) {
 
 			e.printStackTrace(); }
+		
+		data.add(obj);
+		
+		
+		for(int i=1;i<arrayData.length;i++) {
+			
+			tempText = arrayData[i];
+			index = tempText.indexOf("{");
+			indexNext = tempText.indexOf("open")-2;
+			tempText= tempText.substring(index, indexNext)+"}";
+			parser = new JSONParser();  
+			json = (JSONObject) parser.parse(tempText); 
+			objectMapper = new ObjectMapper(); 
+			
+			try { 
+				obj = objectMapper.readValue(json.toJSONString(),ApiTemplateTicker.class );
 
+			}catch(Exception e) {
+
+				e.printStackTrace(); }
+			
+			data.add(obj);
+			
+			
+			
+		}
+		
 		return data;
 
 
 	}
 
-	public static Map<String, Float> SaveInitialData(List<ApiTemplate> data) {
+	public static Map<String, Float> SaveInitialData(List<ApiTemplateTicker> data) {
 
 		Map<String, Float> price = new HashMap<String, Float>();
 		for(int i=0;i<data.size();i++) {
-			if(data.get(i).getQuoteMarket().equals("usdt")) {
-				price.put(data.get(i).getBaseMarket(), data.get(i).getLast());
+			if(data.get(i).getQuote_unit().equals("usdt")) {
+				price.put(data.get(i).getBase_unit(), data.get(i).getLast());
 			}
 		}
 
@@ -88,7 +121,7 @@ public class GetApiData {
 		dialog.pack();
 		dialog.setBounds(300, 400, 600, 150);
 
-		Timer timer = new Timer(10000, new AbstractAction() {
+		Timer timer = new Timer(5000, new AbstractAction() {
 		    @Override
 		    public void actionPerformed(ActionEvent ae) {
 		        dialog.dispose();
@@ -100,7 +133,7 @@ public class GetApiData {
 		 
 	}
 	
-	public static void GettingDifference(Map<String, Float> initial) throws InterruptedException, IOException {
+	public static void GettingDifference(Map<String, Float> initial) throws InterruptedException, IOException, ParseException {
 
 		List<Float> initialPrice = new ArrayList<>(initial.values());
 		List<Float> currentPrice = null;
@@ -108,7 +141,7 @@ public class GetApiData {
 
 		while(1>0) {
 			middlePrice = currentPrice;
-			List<ApiTemplate> currentData = GetData();
+			List<ApiTemplateTicker> currentData = GetData();
 			Map<String, Float> currentDataMap = SaveInitialData(currentData);
 			currentPrice = new ArrayList<>(currentDataMap.values());
 			
@@ -247,12 +280,13 @@ public class GetApiData {
 		return zero;
 	}
 
-	public static void main(String args[]) throws IOException, InterruptedException {
+	public static void main(String args[]) throws IOException, InterruptedException, ParseException {
 
-		List<ApiTemplate> initialPrice = GetData();
+		List<ApiTemplateTicker> initialPrice = GetData();
 		Map<String, Float> initialData = SaveInitialData(initialPrice);
-		SaveToExcel.SaveDataToExcel(initialPrice);
+		//SaveToExcel.SaveDataToExcel(initialPrice);
 		GettingDifference(initialData);
 	}
+
 
 }
