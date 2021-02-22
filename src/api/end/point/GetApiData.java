@@ -247,12 +247,13 @@ public class GetApiData {
 		return zero;
 	}
 
-	public static void main(String args[]) throws IOException, InterruptedException {
-
-		List<ApiTemplate> initialPrice = GetData();
-		Map<String, Float> initialData = SaveInitialData(initialPrice);
-		SaveToExcel.SaveDataToExcel(initialPrice);
-		GettingDifference(initialData);
-	}
+	/*
+	 * public static void main(String args[]) throws IOException,
+	 * InterruptedException {
+	 * 
+	 * List<ApiTemplate> initialPrice = GetData(); Map<String, Float> initialData =
+	 * SaveInitialData(initialPrice); SaveToExcel.SaveDataToExcel(initialPrice);
+	 * GettingDifference(initialData); }
+	 */
 
 }

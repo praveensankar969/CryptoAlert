@@ -1,6 +1,7 @@
 package api.end.point;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.io.BufferedReader;
@@ -8,6 +9,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,8 +23,11 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
 import javax.swing.Timer;
+import javax.ws.rs.core.UriBuilder;
+
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -150,49 +158,35 @@ public class PriceTickerAPIDynamicApplet {
 		List<Float> currentPrice = null;
 		List<Float> middlePrice = initialPrice;
 
-		JFrame frame = new JFrame("Price Alert"); 
-		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE); 
-		JLabel textLabel = new JLabel("", SwingConstants.CENTER);
-		textLabel.setPreferredSize(new Dimension(600, 250)); 
-		frame.getContentPane().add(textLabel, BorderLayout.CENTER);
-		frame.pack(); 
-		frame.setVisible(true);
 
 
 		while(1>0) {
-			
+
 			List<ApiTemplateTicker> currentData = GetData();
 			Map<String, Float> currentDataMap = SaveInitialData(currentData);
 			currentPrice = new ArrayList<>(currentDataMap.values());
 			System.out.println("Check Point Timeout 30 seconds at " + java.time.LocalTime.now());
 			String coin;
-			String setText_= "<html>";
+			String setText_= "";
 			float changePercentage;
-			
+
 			for(int i=0;i<currentPrice.size();i++) {
-				
-				
+
+
 				if(currentPrice.get(i)- initialPrice.get(i) >0) {
 					changePercentage = ((currentPrice.get(i)- initialPrice.get(i))/initialPrice.get(i))*100;
-					
-					if(changePercentage>1.5) {
-						
-						coin  = GetKey(initial,initialPrice.get(i));
-							
-						if(middlePrice.get(i)!=currentPrice.get(i)) {
-								setText_ += "\n Change in:  "+coin + "   Initial Price:         "+ initialPrice.get(i) + "   Current Price:        "+currentPrice.get(i) + "    Change %=  "+changePercentage +" <br/>";
-						
-						}
+					coin  = GetKey(initial,initialPrice.get(i));
+					if(changePercentage>1) {
+						setText_ += "\n Change in "+coin +" Initial Price: "+initialPrice.get(i)+"  Current Price:  "+currentPrice.get(i)+"  Change%:  "+changePercentage;
 					}
-					
 				}
 			}
-				
-				middlePrice = currentPrice;
-				textLabel.setText(setText_+"</html>");
-				Thread.sleep(30000);
-				System.out.println("---------------------------------------------------------------------------------------------------");
-			}
+
+			middlePrice = currentPrice;
+			SendUpdates(setText_);
+			Thread.sleep(45000);
+			System.out.println("---------------------------------------------------------------------------------------------------");
+		}
 	}
 
 
@@ -221,17 +215,47 @@ public class PriceTickerAPIDynamicApplet {
 		return zero;
 	}
 
+	
+	public static void SendUpdates(String message) throws IOException, InterruptedException {
+		
+		HttpClient client = HttpClient.newBuilder()
+	                .connectTimeout(Duration.ofSeconds(5))
+	                .version(HttpClient.Version.HTTP_2)
+	                .build();
+	 
+	        UriBuilder builder = UriBuilder
+	                .fromUri("https://api.telegram.org")
+	                .path("/{token}/sendMessage")
+	                .queryParam("chat_id", "-514815556")
+	                .queryParam("text", message);
+		 
+	        HttpRequest request = HttpRequest.newBuilder()
+	                .GET()
+	                .uri(builder.build("bot" + "1579392802:AAGjgAGepaNFx_5aSH8b2ZcKAj4QNRRHmPA"))
+	                .timeout(Duration.ofSeconds(5))
+	                .build();
+		 
+	        HttpResponse<String> response = client
+	                .send(request, HttpResponse.BodyHandlers.ofString());
+		
+		
+		
+	}
 	public static void main(String args[]) throws IOException, InterruptedException, ParseException {
 
-//		List<ApiTemplateTicker> initialPrice = GetData();
-//		Map<String, Float> initialData = SaveInitialData(initialPrice);
-//		SaveToExcel.SaveDataToExcelTickerAPI(initialPrice);
-		
-		
-		Map<String, Float> initialData = SaveToExcel.GetDataToExcelTickerAPI();
+		/*
+		 * List<ApiTemplateTicker> initialPrice = GetData(); Map<String, Float>
+		 * initialData = SaveInitialData(initialPrice); String name =
+		 * SaveToExcel.SaveDataToExcelTickerAPI(initialPrice); System.out.println(name);
+		 */
+
+
+		Map<String, Float> initialData = SaveToExcel.GetDataToExcelTickerAPI("Data-Ticker-API22-49-21 09-49");
 		GettingDifference(initialData);
+
 		
 		
+
 	}
 
 

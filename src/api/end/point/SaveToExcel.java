@@ -48,12 +48,13 @@ public class SaveToExcel {
 
 	}
 
-	public static void SaveDataToExcelTickerAPI(List<ApiTemplateTicker> data) throws IOException {
+	public static String SaveDataToExcelTickerAPI(List<ApiTemplateTicker> data) throws IOException {
 
 		FileInputStream fis = new FileInputStream("C:\\Users\\sanka\\workspace\\ChangeRetrival\\data\\CryptoData.xlsx");
 		XSSFWorkbook workbook = new XSSFWorkbook(fis);
 		SimpleDateFormat format = new SimpleDateFormat("dd-mm-yy HH-mm");
-		XSSFSheet sheet = workbook.createSheet("Data-Ticker-API");
+		String sheetName = "Data-Ticker-API"+ format.format(new Date());
+		XSSFSheet sheet = workbook.createSheet(sheetName);
 
 		XSSFRow row;
 		row = sheet.createRow(0);
@@ -76,14 +77,14 @@ public class SaveToExcel {
 		FileOutputStream fos = new FileOutputStream("C:\\Users\\sanka\\workspace\\ChangeRetrival\\data\\CryptoData.xlsx");
 		workbook.write(fos);
 		fos.close();fis.close();workbook.close();
-
+		return sheetName;
 	}
 
-	public static Map<String, Float> GetDataToExcelTickerAPI() throws IOException {
+	public static Map<String, Float> GetDataToExcelTickerAPI(String sheetName) throws IOException {
 
 		FileInputStream fis = new FileInputStream("C:\\Users\\sanka\\workspace\\ChangeRetrival\\data\\CryptoData.xlsx");
 		XSSFWorkbook workbook = new XSSFWorkbook(fis);
-		XSSFSheet sheet = workbook.getSheet("Data-Ticker-API");
+		XSSFSheet sheet = workbook.getSheet(sheetName);
 
 		XSSFRow row;
 		String coin;

@@ -285,13 +285,15 @@ public class PriceTickerAPI {
 		return zero;
 	}
 
-	public static void main(String args[]) throws IOException, InterruptedException, ParseException {
-
-		List<ApiTemplateTicker> initialPrice = GetData();
-		Map<String, Float> initialData = SaveInitialData(initialPrice);
-		//SaveToExcel.SaveDataToExcel(initialPrice);
-		GettingDifference(initialData);
-	}
+	/*
+	 * public static void main(String args[]) throws IOException,
+	 * InterruptedException, ParseException {
+	 * 
+	 * List<ApiTemplateTicker> initialPrice = GetData(); Map<String, Float>
+	 * initialData = SaveInitialData(initialPrice);
+	 * //SaveToExcel.SaveDataToExcel(initialPrice); GettingDifference(initialData);
+	 * }
+	 */
 
 
 }
